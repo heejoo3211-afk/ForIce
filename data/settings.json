@@ -1,0 +1,17 @@
+{
+  "1528205506101907549": {
+    "adminRoleIds": [],
+    "pointRoleIds": [],
+    "managerUserIds": [
+      "1459792310618427524",
+      "1431620763827310642",
+      "1528176309438648431"
+    ],
+    "outputChannelId": null,
+    "rechargeChannelId": null,
+    "panelChannelId": "1528205506584510528",
+    "panelMessageId": "1528255851075338361",
+    "datingEnabled": false,
+    "purchaseHistory": []
+  }
+}
