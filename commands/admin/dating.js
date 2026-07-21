@@ -58,7 +58,7 @@ module.exports = {
     /*
      * 콜팅 시작
      */
-    if ( action === "시작") {
+    if (action === "시작") {
       updateGuildSettings(
         interaction.guildId,
         (settings) => {
