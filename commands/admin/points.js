@@ -21,53 +21,39 @@ const {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("포인트")
-    .setDescription("포인트 관리")
-    .addSubcommand((s) =>
-      s
-        .setName("지급")
-        .setDescription("포인트 지급")
-        .addUserOption((o) =>
-          o
-            .setName("유저")
-            .setDescription("대상")
-            .setRequired(true)
-        )
-        .addIntegerOption((o) =>
-          o
-            .setName("금액")
-            .setDescription("금액")
-            .setRequired(true)
-            .setMinValue(1)
-        )
-    )
-    .addSubcommand((s) =>
-      s
-        .setName("제거")
-        .setDescription("포인트 제거")
-        .addUserOption((o) =>
-          o
-            .setName("유저")
-            .setDescription("대상")
-            .setRequired(true)
-        )
-        .addIntegerOption((o) =>
-          o
-            .setName("금액")
-            .setDescription("금액")
-            .setRequired(true)
-            .setMinValue(1)
+    .setDescription("포인트를 지급, 제거하거나 조회합니다.")
+    .addStringOption((option) =>
+      option
+        .setName("작업")
+        .setDescription("실행할 작업을 선택하세요.")
+        .setRequired(true)
+        .addChoices(
+          {
+            name: "지급",
+            value: "지급",
+          },
+          {
+            name: "제거",
+            value: "제거",
+          },
+          {
+            name: "조회",
+            value: "조회",
+          }
         )
     )
-    .addSubcommand((s) =>
-      s
-        .setName("조회")
-        .setDescription("포인트 조회")
-        .addUserOption((o) =>
-          o
-            .setName("유저")
-            .setDescription("대상")
-            .setRequired(true)
-        )
+    .addUserOption((option) =>
+      option
+        .setName("유저")
+        .setDescription("대상 유저")
+        .setRequired(true)
+    )
+    .addIntegerOption((option) =>
+      option
+        .setName("금액")
+        .setDescription("지급하거나 제거할 포인트")
+        .setRequired(false)
+        .setMinValue(1)
     ),
 
   async execute(interaction) {
@@ -78,10 +64,16 @@ module.exports = {
       });
     }
 
-    const sub = interaction.options.getSubcommand();
-    const target = interaction.options.getUser("유저", true);
+    const action =
+      interaction.options.getString("작업", true);
 
-    if (sub === "조회") {
+    const target =
+      interaction.options.getUser("유저", true);
+
+    /*
+     * 포인트 조회
+     */
+    if (action === "조회") {
       const user = getUser(
         interaction.guildId,
         target.id
@@ -117,16 +109,29 @@ module.exports = {
       });
     }
 
+    /*
+     * 지급·제거일 때 금액 필수 확인
+     */
     const amount =
-      interaction.options.getInteger("금액", true);
+      interaction.options.getInteger("금액");
+
+    if (!amount) {
+      return interaction.reply({
+        content:
+          `포인트 ${action} 작업에는 금액을 입력해야 합니다.`,
+        ephemeral: true,
+      });
+    }
 
     const updated = updateUser(
       interaction.guildId,
       target.id,
       (data) => {
-        if (sub === "지급") {
+        if (action === "지급") {
           data.points += amount;
-        } else {
+        }
+
+        if (action === "제거") {
           data.points = Math.max(
             0,
             data.points - amount
@@ -140,7 +145,7 @@ module.exports = {
     /*
      * 포인트 지급일 때만 콜팅 후원 기록에 저장
      */
-    if (sub === "지급") {
+    if (action === "지급") {
       updateGuildSettings(
         interaction.guildId,
         (settings) => {
@@ -162,7 +167,7 @@ module.exports = {
     const channel =
       await getRechargeChannel(interaction);
 
-    if (sub === "지급") {
+    if (action === "지급") {
       await channel.send({
         content:
           `# ${target}님이 ` +
@@ -171,7 +176,9 @@ module.exports = {
           users: [target.id],
         },
       });
-    } else {
+    }
+
+    if (action === "제거") {
       await channel.send({
         content:
           `# ${target}님의 포인트에서 ` +

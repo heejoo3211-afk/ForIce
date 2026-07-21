@@ -6,13 +6,27 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName("매니저")
     .setDescription("매니저 관리")
-    .addSubcommand((s) =>
-      s.setName("임명").setDescription("매니저 임명")
-        .addUserOption((o) => o.setName("유저").setDescription("대상").setRequired(true))
+    .addStringOption((option) =>
+      option
+        .setName("작업")
+        .setDescription("실행할 작업을 선택하세요.")
+        .setRequired(true)
+        .addChoices(
+          {
+            name: "임명",
+            value: "임명",
+          },
+          {
+            name: "해임",
+            value: "해임",
+          }
+        )
     )
-    .addSubcommand((s) =>
-      s.setName("해임").setDescription("매니저 해임")
-        .addUserOption((o) => o.setName("유저").setDescription("대상").setRequired(true))
+    .addUserOption((option) =>
+      option
+        .setName("유저")
+        .setDescription("대상")
+        .setRequired(true)
     ),
 
   async execute(interaction) {
@@ -23,21 +37,32 @@ module.exports = {
       });
     }
 
-    const sub = interaction.options.getSubcommand();
-    const target = interaction.options.getUser("유저", true);
+    const action =
+      interaction.options.getString("작업", true);
 
-    updateGuildSettings(interaction.guildId, (settings) => {
-      const ids = new Set(settings.managerUserIds);
+    const target =
+      interaction.options.getUser("유저", true);
 
-      if (sub === "임명") ids.add(target.id);
-      else ids.delete(target.id);
+    updateGuildSettings(
+      interaction.guildId,
+      (settings) => {
+        const ids = new Set(
+          settings.managerUserIds || []
+        );
 
-      settings.managerUserIds = [...ids];
-      return settings;
-    });
+        if (action === "임명") {
+          ids.add(target.id);
+        } else {
+          ids.delete(target.id);
+        }
+
+        settings.managerUserIds = [...ids];
+        return settings;
+      }
+    );
 
     return interaction.reply({
-      content: `${target}님 매니저 ${sub} 완료`,
+      content: `${target}님 매니저 ${action} 완료`,
       ephemeral: true,
     });
   },
