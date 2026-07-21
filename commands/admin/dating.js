@@ -94,7 +94,7 @@ module.exports = {
 > " . "을 작성하신 분들 중 한분과 1 : 1 대화 진행
 -# ⤷ 대화를 진행하고 콜 & 팅 고르기
 
-ㅤ 𓈒⠀⠀⠀︵︵︵⠀◟ <:6_hongdae_aSG_H2020:1495112525132337403> ◞⠀︵[︵](https://cdn.discordapp.com/attachments/1504784795123712022/1504869565270855801/GIF.gif?ex=6a088e7f&is=6a073cff&hm=cba85cd2e771fa0ec0764f8f3b1aefd368ded6eeebd0610e026aff2f34fc13dc&)︵⠀⠀⠀𓈒
+ㅤ 𓈒︵︵︵⠀◟ <:6_hongdae_aSG_H2020:1495112525132337403> ◞⠀︵[︵](https://cdn.discordapp.com/attachments/1504784795123712022/1504869565270855801/GIF.gif?ex=6a088e7f&is=6a073cff&hm=cba85cd2e771fa0ec0764f8f3b1aefd368ded6eeebd0610e026aff2f34fc13dc&)︵⠀⠀⠀𓈒
 
 -# 콜팅 관련 모든 문의 고위직에게 문의 주세요 !
 || @everyone , <@&1493615810084868176> ||`,
