@@ -19,23 +19,28 @@ const {
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("콜팅")
-    .setDescription("콜팅 상태 관리")
-    .addSubcommand((subcommand) =>
-      subcommand
-        .setName("시작")
-        .setDescription("콜팅을 시작합니다.")
-    )
-    .addSubcommand((subcommand) =>
-      subcommand
-        .setName("종료")
-        .setDescription("콜팅을 종료하고 후원 순서를 표시합니다.")
-    )
-    .addSubcommand((subcommand) =>
-      subcommand
-        .setName("재시작")
-        .setDescription("구매 기록을 초기화하고 콜팅을 재시작합니다.")
-    ),
+  .setName("콜팅")
+  .setDescription("콜팅 상태를 관리합니다.")
+  .addStringOption((option) =>
+    option
+      .setName("작업")
+      .setDescription("실행할 작업을 선택하세요.")
+      .setRequired(true)
+      .addChoices(
+        {
+          name: "시작",
+          value: "시작",
+        },
+        {
+          name: "종료",
+          value: "종료",
+        },
+        {
+          name: "재시작",
+          value: "재시작",
+        }
+      )
+  ),
 
   async execute(interaction) {
     if (!isBotAdmin(interaction)) {
@@ -45,15 +50,15 @@ module.exports = {
       });
     }
 
-    const subcommand =
-      interaction.options.getSubcommand();
+    const action =
+  interaction.options.getString("작업", true);
 
     const channel = await getOutputChannel(interaction);
 
     /*
      * 콜팅 시작
      */
-    if (subcommand === "시작") {
+    if ( action === "시작") {
       updateGuildSettings(
         interaction.guildId,
         (settings) => {
@@ -108,7 +113,7 @@ module.exports = {
     /*
      * 콜팅 재시작
      */
-    if (subcommand === "재시작") {
+    if ( action === "재시작") {
       updateGuildSettings(
         interaction.guildId,
         (settings) => {
@@ -134,7 +139,7 @@ module.exports = {
     /*
      * 콜팅 종료
      */
-    if (subcommand === "종료") {
+    if (action === "종료") {
       const settings = getGuildSettings(
         interaction.guildId
       );
