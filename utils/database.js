@@ -11,16 +11,19 @@ const FILES = {
 
 const DEFAULT_SETTINGS = {
   mcIds: [],
+  currentMcId: null,
+
   adminRoleIds: [],
   pointRoleIds: [],
   managerUserIds: [],
+
   outputChannelId: null,
   rechargeChannelId: null,
   panelChannelId: null,
   panelMessageId: null,
+
   datingEnabled: false,
 
-  // 콜팅 중 구매한 순서를 저장
   purchaseHistory: [],
 };
 

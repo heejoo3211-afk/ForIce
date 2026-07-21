@@ -18,7 +18,7 @@ module.exports = {
     .addStringOption((option) =>
       option
         .setName("작업")
-        .setDescription("실행할 작업을 선택하세요.")
+        .setDescription("실행할 작업")
         .setRequired(true)
         .addChoices(
           {
@@ -34,7 +34,7 @@ module.exports = {
     .addUserOption((option) =>
       option
         .setName("유저")
-        .setDescription("지정하거나 해제할 유저")
+        .setDescription("MC 대상")
         .setRequired(true)
     ),
 
@@ -45,8 +45,7 @@ module.exports = {
       )
     ) {
       return interaction.reply({
-        content:
-          "이 명령어는 관리자만 사용할 수 있습니다.",
+        content: "관리자만 사용할 수 있습니다.",
         ephemeral: true,
       });
     }
@@ -59,8 +58,23 @@ module.exports = {
 
     if (target.bot) {
       return interaction.reply({
-        content: "봇은 MC로 지정할 수 없습니다.",
+        content: "봇은 MC가 될 수 없습니다.",
         ephemeral: true,
+      });
+    }
+
+    if (action === "지정") {
+      updateGuildSettings(
+        interaction.guildId,
+        (settings) => {
+          settings.currentMcId = target.id;
+          settings.mcIds = [target.id];
+          return settings;
+        }
+      );
+
+      return interaction.reply({
+        content: `🎤 ${target} 님을 새로운 MC로 지정했습니다.`,
       });
     }
 
@@ -68,62 +82,24 @@ module.exports = {
       interaction.guildId
     );
 
-    const mcIds = Array.isArray(settings.mcIds)
-      ? settings.mcIds
-      : [];
-
-    /*
-     * MC 지정
-     */
-    if (action === "지정") {
-      if (mcIds.includes(target.id)) {
-        return interaction.reply({
-          content:
-            `${target} 님은 이미 MC로 지정되어 있습니다.`,
-          ephemeral: true,
-        });
-      }
-
-      updateGuildSettings(interaction.guildId, (guildSettings) => {
-  guildSettings.mcIds = [target.id];
-  guildSettings.currentMcId = target.id;
-  return guildSettings;
-});
-
+    if (settings.currentMcId !== target.id) {
       return interaction.reply({
-        content:
-          `🎤 ${target} 님을 MC로 지정했습니다.`,
-        allowedMentions: {
-          users: [target.id],
-        },
+        content: "현재 MC가 아닙니다.",
+        ephemeral: true,
       });
     }
 
-    /*
-     * MC 해제
-     */
-    if (action === "해제") {
-      if (!mcIds.includes(target.id)) {
-        return interaction.reply({
-          content:
-            `${target} 님은 MC로 지정되어 있지 않습니다.`,
-          ephemeral: true,
-        });
+    updateGuildSettings(
+      interaction.guildId,
+      (settings) => {
+        settings.currentMcId = null;
+        settings.mcIds = [];
+        return settings;
       }
+    );
 
-      updateGuildSettings(interaction.guildId, (guildSettings) => {
-  guildSettings.mcIds = [];
-  guildSettings.currentMcId = null;
-  return guildSettings;
-});
-
-      return interaction.reply({
-        content:
-          `MC에서 ${target} 님을 해제했습니다.`,
-        allowedMentions: {
-          users: [target.id],
-        },
-      });
-    }
+    return interaction.reply({
+      content: `${target} 님의 MC를 해제했습니다.`,
+    });
   },
 };
