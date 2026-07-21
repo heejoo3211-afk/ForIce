@@ -84,20 +84,11 @@ module.exports = {
         });
       }
 
-      updateGuildSettings(
-        interaction.guildId,
-        (guildSettings) => {
-          guildSettings.mcIds ||= [];
-
-          if (
-            !guildSettings.mcIds.includes(target.id)
-          ) {
-            guildSettings.mcIds.push(target.id);
-          }
-
-          return guildSettings;
-        }
-      );
+      updateGuildSettings(interaction.guildId, (guildSettings) => {
+  guildSettings.mcIds = [target.id];
+  guildSettings.currentMcId = target.id;
+  return guildSettings;
+});
 
       return interaction.reply({
         content:
@@ -120,20 +111,11 @@ module.exports = {
         });
       }
 
-      updateGuildSettings(
-        interaction.guildId,
-        (guildSettings) => {
-          guildSettings.mcIds = Array.isArray(
-            guildSettings.mcIds
-          )
-            ? guildSettings.mcIds.filter(
-                (userId) => userId !== target.id
-              )
-            : [];
-
-          return guildSettings;
-        }
-      );
+      updateGuildSettings(interaction.guildId, (guildSettings) => {
+  guildSettings.mcIds = [];
+  guildSettings.currentMcId = null;
+  return guildSettings;
+});
 
       return interaction.reply({
         content:

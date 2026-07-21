@@ -15,13 +15,7 @@ const {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("mc지갑")
-    .setDescription("선택한 유저의 MC 적립금을 확인합니다.")
-    .addUserOption((option) =>
-      option
-        .setName("유저")
-        .setDescription("MC 적립금을 조회할 유저")
-        .setRequired(true)
-    ),
+    .setDescription("현재 MC의 적립금을 확인합니다."),
 
   async execute(interaction) {
     const settings = getGuildSettings(
@@ -35,16 +29,31 @@ module.exports = {
       });
     }
 
+    if (!settings.currentMcId) {
+      return interaction.reply({
+        content: "현재 지정된 MC가 없습니다.",
+        ephemeral: true,
+      });
+    }
+
     const target =
-      interaction.options.getUser("유저", true);
+      await interaction.client.users.fetch(
+        settings.currentMcId
+      );
 
     const user = getUser(
       interaction.guildId,
-      target.id
+      settings.currentMcId
     );
 
     const embed = new EmbedBuilder()
       .setTitle("MC 지갑")
+      .setThumbnail(
+        target.displayAvatarURL({
+          extension: "png",
+          size: 256,
+        })
+      )
       .setDescription(
         `${target}님의 MC 적립금: **${formatNumber(
           user.mc
