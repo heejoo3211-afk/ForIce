@@ -5,7 +5,13 @@ const { formatNumber } = require("../../utils/common");
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("mc지갑")
-    .setDescription("내 MC 적립금을 확인합니다."),
+    .setDescription("MC 적립금을 확인합니다.")
+    .addUserOption((option) =>
+      option
+        .setName("유저")
+        .setDescription("조회할 유저")
+        .setRequired(false)
+    ),
 
   async execute(interaction) {
     const settings = getGuildSettings(interaction.guildId);
@@ -17,12 +23,22 @@ module.exports = {
       });
     }
 
-    const user = getUser(interaction.guildId, interaction.user.id);
+    const target =
+      interaction.options.getUser("유저") ?? interaction.user;
+
+    const user = getUser(
+      interaction.guildId,
+      target.id
+    );
 
     const embed = new EmbedBuilder()
       .setTitle("MC 지갑")
-      .setDescription(`${interaction.user}님의 MC 적립금: **${formatNumber(user.mc)}P**`);
+      .setDescription(
+        `${target}님의 MC 적립금: **${formatNumber(user.mc)}P**`
+      );
 
-    return interaction.reply({ embeds: [embed] });
+    return interaction.reply({
+      embeds: [embed],
+    });
   },
 };
