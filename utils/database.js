@@ -10,6 +10,7 @@ const FILES = {
 };
 
 const DEFAULT_SETTINGS = {
+  mcIds: [],
   adminRoleIds: [],
   pointRoleIds: [],
   managerUserIds: [],
