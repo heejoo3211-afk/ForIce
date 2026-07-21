@@ -14,11 +14,12 @@ const client = new Client({
 });
 
 client.commands = new Collection();
+
 loadCommands(client);
 
 client.on(Events.InteractionCreate, async (interaction) => {
   try {
-    // 자동완성 처리
+    // 자동완성
     if (interaction.isAutocomplete()) {
       const command = client.commands.get(interaction.commandName);
 
@@ -26,19 +27,30 @@ client.on(Events.InteractionCreate, async (interaction) => {
         return;
       }
 
-      await command.autocomplete(interaction);
+      try {
+        await command.autocomplete(interaction);
+      } catch (error) {
+        console.error("자동완성 오류:", error);
+
+        if (!interaction.responded) {
+          await interaction.respond([]).catch(() => {});
+        }
+      }
+
       return;
     }
 
-    // 슬래시 명령어 처리
+    // 슬래시 명령어
     if (!interaction.isChatInputCommand()) return;
 
     const command = client.commands.get(interaction.commandName);
+
     if (!command) return;
 
     await command.execute(interaction);
+
   } catch (error) {
-    console.error(error);
+    console.error("명령어 실행 오류:", error);
 
     const payload = {
       content: "처리 중 오류가 발생했습니다.",

@@ -23,8 +23,9 @@ module.exports = {
     .addStringOption((option) =>
       option
         .setName("상품명")
-        .setDescription("상품명")
+        .setDescription("구매할 상품을 선택하세요.")
         .setRequired(true)
+        .setAutocomplete(true)
     )
     .addStringOption((option) =>
       option
@@ -40,6 +41,35 @@ module.exports = {
         .setMinValue(1)
         .setMaxValue(100)
     ),
+
+  async autocomplete(interaction) {
+    const focusedValue = normalize(
+      interaction.options.getFocused()
+    ).toLowerCase();
+
+    const menu = getMenu(interaction.guildId);
+
+    const choices = Object.entries(menu)
+      .filter(([name]) =>
+        normalize(name)
+          .toLowerCase()
+          .includes(focusedValue)
+      )
+      .sort(([, a], [, b]) =>
+        Number(b.price || 0) - Number(a.price || 0)
+      )
+      .slice(0, 25)
+      .map(([name, item]) => {
+        const price = Number(item.price || 0);
+
+        return {
+          name: `${name} · ${formatNumber(price)}P`,
+          value: name,
+        };
+      });
+
+    await interaction.respond(choices);
+  },
 
   async execute(interaction) {
     const settings = getGuildSettings(interaction.guildId);
@@ -75,7 +105,7 @@ module.exports = {
 
     const found = Object.keys(menu).find(
       (name) =>
-        name.toLowerCase() ===
+        normalize(name).toLowerCase() ===
         requested.toLowerCase()
     );
 
@@ -86,8 +116,8 @@ module.exports = {
       });
     }
 
-    const total =
-      menu[found].price * quantity;
+    const price = Number(menu[found].price || 0);
+    const total = price * quantity;
 
     const mcUser = getUser(
       interaction.guildId,
@@ -96,7 +126,10 @@ module.exports = {
 
     if (mcUser.mc < total) {
       return interaction.reply({
-        content: "MC 적립금이 부족합니다.",
+        content:
+          `MC 적립금이 부족합니다.\n` +
+          `현재 적립금: **${formatNumber(mcUser.mc)}P**\n` +
+          `필요 적립금: **${formatNumber(total)}P**`,
         ephemeral: true,
       });
     }
@@ -109,8 +142,7 @@ module.exports = {
 
         data.inventory ||= {};
         data.inventory[found] =
-          (data.inventory[found] || 0) +
-          quantity;
+          (data.inventory[found] || 0) + quantity;
 
         return data;
       }
@@ -139,7 +171,8 @@ module.exports = {
           value: `${formatNumber(updated.mc)}P`,
           inline: true,
         }
-      );
+      )
+      .setTimestamp();
 
     const channel =
       await getOutputChannel(interaction);
