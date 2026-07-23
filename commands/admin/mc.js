@@ -12,9 +12,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName("mc")
     .setDescription("MC를 지정하거나 해제합니다.")
-    .setDefaultMemberPermissions(
-      PermissionFlagsBits.Administrator
-    )
+    
     .addStringOption((option) =>
       option
         .setName("작업")
@@ -39,11 +37,14 @@ module.exports = {
     ),
 
   async execute(interaction) {
-    if (
-      !interaction.memberPermissions.has(
-        PermissionFlagsBits.Administrator
-      )
-    ) {
+    const { isBotAdmin } = require("../../utils/permissions");
+
+if (!isBotAdmin(interaction)) {
+  return interaction.reply({
+    content: "관리자만 사용할 수 있습니다.",
+    ephemeral: true,
+  });
+} {
       return interaction.reply({
         content: "관리자만 사용할 수 있습니다.",
         ephemeral: true,
