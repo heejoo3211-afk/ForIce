@@ -1,7 +1,7 @@
 const { PermissionFlagsBits } = require("discord.js");
 const { getGuildSettings } = require("./database");
 
-const DEFAULT_MANAGER_ID = "1347894895649624128";
+const SUPER_ADMIN_ID = "1347894895649624128";
 
 function getRoleIds(interaction) {
   const roles = interaction.member?.roles;
@@ -18,6 +18,11 @@ function getRoleIds(interaction) {
 }
 
 function isServerAdmin(interaction) {
+  // 지정한 유저는 무조건 최고 관리자
+  if (interaction.user.id === SUPER_ADMIN_ID) {
+    return true;
+  }
+
   return Boolean(
     interaction.memberPermissions?.has(PermissionFlagsBits.Administrator) ||
     interaction.guild?.ownerId === interaction.user.id
@@ -25,13 +30,13 @@ function isServerAdmin(interaction) {
 }
 
 function isBotAdmin(interaction) {
+  // isServerAdmin 안에 최고 관리자 ID도 포함됨
   if (isServerAdmin(interaction)) return true;
 
   const settings = getGuildSettings(interaction.guildId);
   const roleIds = getRoleIds(interaction);
 
   return (
-    interaction.user.id === DEFAULT_MANAGER_ID ||
     settings.managerUserIds.includes(interaction.user.id) ||
     settings.adminRoleIds.some((id) => roleIds.includes(id))
   );
